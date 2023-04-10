@@ -1,11 +1,13 @@
 import { Address, Enrollment } from '@prisma/client';
 import { request } from '@/utils/request';
-import { invalidDataError, notFoundError } from '@/errors';
+import { invalidDataError, notFoundError, invalidCepError } from '@/errors';
 import addressRepository, { CreateAddressParams } from '@/repositories/address-repository';
 import enrollmentRepository, { CreateEnrollmentParams } from '@/repositories/enrollment-repository';
 import { exclude } from '@/utils/prisma-utils';
 
 async function getAddressFromCEP(cep: string) {
+  if (Number.isNaN(Number(cep)) || cep.length !== 8) throw invalidCepError();
+
   const result = await request.get(`${process.env.VIA_CEP_API}/${cep}/json/`);
   if (!result.data) {
     throw notFoundError();
